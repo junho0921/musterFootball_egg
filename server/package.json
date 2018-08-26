@@ -1,0 +1,25 @@
+{
+  "name": "oa",
+  "version": "1.0.0",
+  "description": "muster football",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "egg-bin dev",
+    "test:start": "EGG_SERVER_ENV=local egg-scripts start --daemon --workers=1 --title=musterFootball",
+    "test:stop": "egg-scripts stop --title=musterFootball",
+    "start": "egg-scripts start --daemon --workers=4 --title=musterFootball",
+    "stop": "egg-scripts stop --title=musterFootball"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "egg": "^2.2.0",
+    "egg-mysql": "^3.0.0",
+    "egg-scripts": "^2.5.0",
+    "egg-view-nunjucks": "^2.2.0"
+  },
+  "devDependencies": {
+    "egg-bin": "^4.3.7"
+  }
+}

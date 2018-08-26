@@ -1,0 +1,21 @@
+#joinMatchPanel{
+    display: none;
+    background: #eee;
+    padding: 10px
+}
+
+.userSpan{
+    display: inline-block;
+    border: 2px solid lightgrey;
+    text-align: center;
+    margin-right: 10px;
+}
+.userSpan img{
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    border-radius: 100%;
+}
+.memberControl{
+    display:none;
+}
