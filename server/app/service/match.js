@@ -5,12 +5,6 @@ const Service  = require('egg').Service;
 // 数据库表名
 const TABLE_NAME = 'matchs';
 
-const matchObj = (matchId) => ({
-    matchId,
-    membersList: [],
-
-});
-
 class RemarkService extends Service {
     /**
      * 查询
@@ -66,26 +60,6 @@ class RemarkService extends Service {
         const { app } = this;
         const result = await app.mysql.delete(TABLE_NAME, item);
         return result && result.affectedRows === 1;
-    }
-
-    /**
-     * 分组查询参评过的用户列表
-     */
-    async findByGroup() {
-        const { app } = this;
-        const sql = `select kpi_id,username,chinese_name,org_name from ${TABLE_NAME} group by kpi_id, username, chinese_name, org_name`;
-        const result = await app.mysql.query(sql);
-        return result;
-    }
-
-    /**
-     * 查询中文名为空的用户列表
-     */
-    async findCNameIsNull() {
-        const { app } = this;
-        const sql = `select * from dt_kpi_remark where chinese_name is null limit 0,10`;
-        const result = await app.mysql.query(sql);
-        return result;
     }
 }
 
