@@ -24,7 +24,10 @@ const renderMatchInfo = item => (`
         <span>最大人数: ${item.max_numbers}</span>
     </label>
     <div>
-        <span>已经报名: ${item.members && item.members.map(renderUserSpan).join('')}</span>
+        <span>发起人: ${item.leader && renderUserSpan(item.leader)}</span>
+    </div>
+    <div>
+        <span>报名人: ${item.members && item.members.length && item.members.map(renderUserSpan).join('')}</span>
     </div>
 `);
 

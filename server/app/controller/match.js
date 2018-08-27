@@ -33,6 +33,7 @@ class MatchController extends Controller {
             }
             return sum
         }, []);
+        console.log('match--------', matchs)
         let membersInfo = await ctx.service.user.find({
             columns: ['name', 'wx_img', 'real_name', 'open_id'],
             where: {
@@ -40,17 +41,13 @@ class MatchController extends Controller {
             }
         });
         matchs.forEach(item => {
-            item.leader = membersInfo.find(i => i.open_id == item.leader)
-            if(item.leader){
-                delete item.leader.open_id
-            }
+            item.leader = Object.assign({}, membersInfo.find(i => i.open_id == item.leader));
+            delete item.leader.open_id;
             if(item.members){
                 item.members = item.members.map(id => {
-                    let info = membersInfo.find(i => i.open_id == id)
-                    if(info){
-                        delete info.open_id
-                    }
-                    return info
+                    let info = Object.assign({}, membersInfo.find(i => i.open_id == id));
+                    delete info.open_id;
+                    return info;
                 })
             }
         })

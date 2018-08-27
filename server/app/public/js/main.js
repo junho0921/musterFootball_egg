@@ -3,6 +3,7 @@ const app = {
     // 页面的比赛信息
     match: null,
     matchId: pageMatchId && pageMatchId[1],
+    userType: undefined,
     // 用户信息
     user:{},
     // 初始化
@@ -32,12 +33,9 @@ const getUserInfo = type => req_getInfo(type).then((result) => {
     }
 });
 // 登陆
-$('#login').click(() => {getUserInfo()});
 $('.login').click((e) => {
-    let $e = $(e.target);
-    let type = $e.data('type');
-    console.log('type', type);
-    getUserInfo(type+'').then(() => {
+    app.userType = $(e.target).data('type');
+    getUserInfo(app.userType).then(() => {
         if(app.matchId){
             getUserIsJoinedMatch(app.matchId, app.user.openId).then(result => {
                 let isJoined = result && !!result.data;
@@ -73,7 +71,7 @@ $('#muster').click(() => {
     req_musterMatch(data).then((result) => {
         console.log('更新信息 -> ', result);
         if(result.data){
-            getUserInfo();
+            getUserInfo(app.userType);
         }
     });
 });

@@ -6,7 +6,6 @@
 <body>
 
   <div>
-    <button id="login">leader 登陆</button>
     {% for item in members %}
       <button class="login" data-type="{{item.type}}">{{ item.name }} 登陆</button>
     {% endfor %}
@@ -55,7 +54,7 @@
     <div>
       <h4>比赛信息</h4>
       <div id="matchDetail"></div>
-      <button class="memberControl joinMatch">报名</button>
+      <button class="memberControl joinMatch">报个名</button>
       <button class="memberControl cancelJoinMatch">取消报名</button>
       <!--<input type="text" id="matchId">-->
       <!--<button id="getMatchInfo">获取比赛信息</button>-->
