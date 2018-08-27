@@ -15,8 +15,7 @@ const app = {
     bindEvent: () => {}
 };
 
-
-const getUserInfo = type => fetch(`/api/user/login${type?'?type='+type:''}`).then(res => res.json()).then((result) => {
+const getUserInfo = type => req_getInfo(type).then((result) => {
     app.user.name = result.data.name;
     app.user.openId = result.data.open_id;
     $('.name').text(app.user.name + '，欢迎你');
@@ -40,7 +39,7 @@ $('.login').click((e) => {
     console.log('type', type);
     getUserInfo(type+'').then(() => {
         if(app.matchId){
-            getUserIsJoinedMatch().then(result => {
+            getUserIsJoinedMatch(app.matchId, app.user.openId).then(result => {
                 let isJoined = result && !!result.data;
                 $('.joinMatch').toggle(!isJoined);
                 $('.cancelJoinMatch').toggle(isJoined);
@@ -52,21 +51,7 @@ $('.login').click((e) => {
 // 更新用户信息
 $('#update').click(() => {
     let phone = $('#phone').val();
-    fetch('/api/user/update', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            phone: phone || Date.now(),
-            name: app.user.name,
-            openId: app.user.openId
-        })
-    }).then((response) => {
-        //返回 object 类型
-        return response.json();
-    }).then((result) => {
+    req_updateInfo(phone, app.user.name, app.user.openId).then((result) => {
         console.log('更新信息 -> ', result);
     });
 });
@@ -84,18 +69,8 @@ $('#muster').click(() => {
         position,
         date
     };
-    console.log('data', data)
-    fetch('/api/match/muster', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    }).then((response) => {
-        //返回 object 类型
-        return response.json();
-    }).then((result) => {
+    console.log('data', data);
+    req_musterMatch(data).then((result) => {
         console.log('更新信息 -> ', result);
         if(result.data){
             getUserInfo();
@@ -103,57 +78,6 @@ $('#muster').click(() => {
     });
 });
 
-const renderMatchList = json => (
-    `<ul>
-        ${json.map(item => (
-            `<li class="matchItem">
-                ${renderMatchInfo(item)}
-                <button class="deleteMatch" data-match="${item.match_id}">删除</button>
-                <button class="shareMatch" data-match="${item.match_id}">邀请</button>
-            </li>`
-        )).join('')}
-    </ul>`
-);
-
-const renderMatchInfo = item => (`
-    <div>
-      <span>比赛类型: ${item.type}</span>
-    </div>
-    <label>
-      <span>地点: ${item.position}</span>
-    </label>
-    <label>
-      <span>时间: ${item.date}</span>
-    </label>
-    <label>
-      <span>最大人数: ${item.max_numbers}</span>
-    </label>
-    <div>
-      <span>已经报名: ${item.members && item.members.map(renderUserSpan).join('')}</span>
-    </div>
-`);
-
-const renderUserSpan = info => (
-`<div class="userSpan">
-    <img src="${info.wx_img}" alt="">
-    <p>${info.name}</p>
-</div>`
-);
-
-// 获取比赛信息
-const getMatchInfo = (idList) => {
-    return fetch(`/api/match/get?id=${JSON.stringify(idList.split(','))}`).then((response) => {
-        //返回 object 类型
-        return response.json();
-    });
-};
-// 获取是否已经参与比赛
-const getUserIsJoinedMatch = () => {
-    return fetch(`/api/match/isJoined?id=${app.matchId}&t=${app.user.openId}`).then((response) => {
-        //返回 object 类型
-        return response.json();
-    })
-};
 
 $('#matchDetailList').on('click', '.deleteMatch', function (e) {
     if(!app.user.openId){
@@ -163,10 +87,7 @@ $('#matchDetailList').on('click', '.deleteMatch', function (e) {
     let matchId = $e.data('match');
     if(matchId){
         console.log('删除', matchId);
-        return fetch(`/api/match/cancel?id=${matchId}&t=${app.user.openId}`).then((response) => {
-            //返回 object 类型
-            return response.json();
-        }).then(result => {
+        return req_cancelMatch(matchId, app.user.openId).then(result => {
             if(result && result.data == 1){
                 $e.parents('.matchItem').remove();
             }
@@ -199,20 +120,6 @@ const loadMatchInfo = () => {
         }
     })
 };
-
-const req_joinMatch = (matchId, openId) =>
-    fetch(`/api/match/join?id=${matchId}&t=${openId}`)
-        .then((response) => {
-            //返回 object 类型
-            return response.json();
-        });
-
-const req_regretMatch = (matchId, openId) =>
-    fetch(`/api/match/regret?id=${matchId}&t=${openId}`)
-        .then((response) => {
-            //返回 object 类型
-            return response.json();
-        });
 
 $('.joinMatch').click(function (e) {
     if(!app.user.openId){
