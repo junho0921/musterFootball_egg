@@ -19,20 +19,7 @@ class RemarkService extends Service {
      */
     async find(options) {
         const { app } = this;
-        const opt = {
-            limit: 10,
-            offset: 0,
-            orders: [['remark_is_superior', 'desc']],
-            where: options
-        };
-        const result = await app.mysql.select(TABLE_NAME, opt);
-        return result.map(item => {
-            // 评分数据转 json
-            if (item.remark_kpi_scores) {
-                item.remark_kpi_scores = JSON.parse(item.remark_kpi_scores);
-            }
-            return item;
-        });
+        return await app.mysql.select(TABLE_NAME, options);
     }
 
     /**

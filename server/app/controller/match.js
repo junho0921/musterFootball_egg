@@ -4,12 +4,6 @@ const Controller = require('egg').Controller;
 
 const {max_login_duration, splitWord} = require('../../config/CONST');
 
-// const getMatchAllInfo = async (match_id) =>{
-//     let matchResult = async ctx.service.match.get({
-//         match_id
-//     }));
-// }
-
 class MatchController extends Controller {
     async get() {
         const { ctx, app } = this;
@@ -19,36 +13,40 @@ class MatchController extends Controller {
             ctx.body = new Error('参数错误');
             return;
         }
-        console.log('=====111====', query);
         try{
             match_id = JSON.parse(match_id);
         }catch (e){}
-        console.log('query', match_id);
-        let ret = Promise.all(match_id.map((id) => this.getMatchAllInfo(id)));
-        ctx.body = await ret;
-    }
-
-    async getMatchAllInfo(match_id) {
-        const { ctx } = this;
-        let match = await ctx.service.match.get({
-            match_id
+        let matchs = await ctx.service.match.find({
+            where: {match_id}
         });
-        console.log('获取所有用户信息', match)
-        if(match && match.members){
-            let members = await Promise.all(
-                match.members.split(splitWord)
-                    .map(open_id => (
-                        ctx.service.user.get({open_id}).then(info => ({
-                            name: info.name,
-                            real_name: info.real_name,
-                            wx_img: info.wx_img,
-                        }))
-                    ))
-            );
-            console.log('报名用户信息', members);
-            match.members = members;
-        }
-        return match;
+        let members_openIds = matchs.reduce((sum, item) => {
+            if(item.leader){
+                sum = sum.concat(item.leader);
+            }
+            if(item.members){
+                item.members = item.members.split(splitWord);
+                sum = sum.concat(item.members);
+            }
+            return sum;
+        }, []);
+        let membersInfo = await ctx.service.user.find({
+            columns: ['name', 'wx_img', 'real_name', 'open_id'],
+            where: {
+                open_id: members_openIds
+            }
+        });
+        matchs.forEach(item => {
+            item.leader = membersInfo.find(i => i.open_id == item.leader);
+            delete item.leader.open_id;
+            if(item.members){
+                item.members = item.members.map(id => {
+                    let info = membersInfo.find(i => i.open_id == id);
+                    delete info.open_id;
+                    return info;
+                });
+            }
+        });
+        ctx.body = matchs;
     }
 
     async isJoined() {

@@ -42,6 +42,17 @@ class UserService extends Service {
         const result = await app.mysql.update(TABLE_NAME, item, options);
         return result && result.affectedRows === 1;
     }
+
+    /**
+     * 查询
+     * @param {Object} options 查询条件
+     * @return {Array<Object>} result
+     */
+    async find(options) {
+        const { app } = this;
+        options.limit = options.limit || 100;
+        return await app.mysql.select(TABLE_NAME, options);
+    }
 }
 
 module.exports = UserService;
