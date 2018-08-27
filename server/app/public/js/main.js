@@ -16,20 +16,28 @@ const app = {
     bindEvent: () => {}
 };
 
-const getUserInfo = type => req_getInfo(type).then((result) => {
+const getUserInfo = type => REQ.getInfo(type).then((result) => {
+    if(failMsg(result)){
+        return alert(failMsg(result));
+    }
     app.user.name = result.data.name;
     app.user.openId = result.data.open_id;
     $('.name').text(app.user.name + '，欢迎你');
     return result && result.data.muster_match;
 }).then(matchs => {
     if(matchs){
-        getMatchInfo(matchs).then((result) => {
+        REQ.getMatchInfo(matchs).then((result) => {
+            if(failMsg(result)){
+                return;
+            }
             if(result && result.data){
                 $('#matchDetailList').html(
                     renderMatchList(result.data)
-                );
+                ).show();
             }
         });
+    }else{
+        $('#matchDetailList').html('').hide();
     }
 });
 // 登陆
@@ -37,7 +45,10 @@ $('.login').click((e) => {
     app.userType = $(e.target).data('type');
     getUserInfo(app.userType).then(() => {
         if(app.matchId){
-            getUserIsJoinedMatch(app.matchId, app.user.openId).then(result => {
+            REQ.getUserIsJoinedMatch(app.matchId, app.user.openId).then(result => {
+                if(failMsg(result)){
+                    return alert(failMsg(result));
+                }
                 let isJoined = result && !!result.data;
                 $('.joinMatch').toggle(!isJoined);
                 $('.cancelJoinMatch').toggle(isJoined);
@@ -49,8 +60,10 @@ $('.login').click((e) => {
 // 更新用户信息
 $('#update').click(() => {
     let phone = $('#phone').val();
-    req_updateInfo(phone, app.user.name, app.user.openId).then((result) => {
-        console.log('更新信息 -> ', result);
+    REQ.updateInfo(phone, app.user.name, app.user.openId).then((result) => {
+        if(failMsg(result)){
+            return alert(failMsg(result));
+        }
     });
 });
 
@@ -68,11 +81,11 @@ $('#muster').click(() => {
         date
     };
     console.log('data', data);
-    req_musterMatch(data).then((result) => {
-        console.log('更新信息 -> ', result);
-        if(result.data){
-            getUserInfo(app.userType);
+    REQ.musterMatch(data).then((result) => {
+        if(failMsg(result)){
+            return alert(failMsg(result));
         }
+        getUserInfo(app.userType);
     });
 });
 
@@ -85,8 +98,11 @@ $('#matchDetailList').on('click', '.deleteMatch', function (e) {
     let matchId = $e.data('match');
     if(matchId){
         console.log('删除', matchId);
-        return req_cancelMatch(matchId, app.user.openId).then(result => {
-            if(result && result.data == 1){
+        return REQ.cancelMatch(matchId, app.user.openId).then(result => {
+            if(failMsg(result)){
+                return alert(failMsg(result));
+            }
+            if(result.data === 1){
                 $e.parents('.matchItem').remove();
             }
         });
@@ -110,7 +126,7 @@ const loadMatchInfo = () => {
         return;
     }
     $('#joinMatchPanel').show();
-    getMatchInfo(app.matchId).then(result => {
+    REQ.getMatchInfo(app.matchId).then(result => {
         let matchInfo = result.data && result.data[0];
         if(matchInfo){
             app.match = matchInfo;
@@ -124,9 +140,12 @@ $('.joinMatch').click(function (e) {
         return alert('请先登陆');
     }
     if(app.matchId){
-        req_joinMatch(app.matchId, app.user.openId)
+        REQ.joinMatch(app.matchId, app.user.openId)
             .then(result => {
-                if(result && result.data == 1){
+                if(failMsg(result)){
+                    return alert(failMsg(result));
+                }
+                if(result.data === 1){
                     $('.joinMatch').hide();
                     $('.cancelJoinMatch').show();
                     loadMatchInfo();
@@ -140,9 +159,12 @@ $('.cancelJoinMatch').click(function (e) {
         return alert('请先登陆');
     }
     if(app.matchId){
-        req_regretMatch(app.matchId, app.user.openId)
+        REQ.regretMatch(app.matchId, app.user.openId)
             .then(result => {
-                if(result && result.data == 1){
+                if(failMsg(result)){
+                    return alert(failMsg(result));
+                }
+                if(result.data === 1){
                     $('.joinMatch').show();
                     $('.cancelJoinMatch').hide();
                     loadMatchInfo();

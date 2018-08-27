@@ -1,23 +1,24 @@
 // 成员参加比赛
-const req_joinMatch = (matchId, openId) =>
+const REQ = {};
+REQ.joinMatch = (matchId, openId) =>
     fetch(`/api/match/join?id=${matchId}&t=${openId}`)
         .then((response) => {
             //返回 object 类型
             return response.json();
         });
 // 成员取消比赛
-const req_regretMatch = (matchId, openId) =>
+REQ.regretMatch = (matchId, openId) =>
     fetch(`/api/match/regret?id=${matchId}&t=${openId}`)
         .then((response) => {
             //返回 object 类型
             return response.json();
         });
 // 获取用户信息
-const req_getInfo = type =>
+REQ.getInfo = type =>
     fetch(`/api/user/login${type?'?type='+type:''}`)
         .then(res => res.json());
 // 更新用户信息
-const req_updateInfo = (phone, name, openId) =>
+REQ.updateInfo = (phone, name, openId) =>
     fetch('/api/user/update', {
         method: 'POST',
         mode: 'cors',
@@ -34,7 +35,7 @@ const req_updateInfo = (phone, name, openId) =>
         return response.json();
     });
 // 发起比赛
-const req_musterMatch = data =>
+REQ.musterMatch = data =>
     fetch('/api/match/muster', {
         method: 'POST',
         mode: 'cors',
@@ -47,20 +48,39 @@ const req_musterMatch = data =>
         return response.json();
     });
 // 获取比赛信息
-const getMatchInfo = (idList) =>
+REQ.getMatchInfo = (idList) =>
     fetch(`/api/match/get?id=${JSON.stringify(idList.split(','))}`).then((response) => {
         //返回 object 类型
         return response.json();
     });
 // 获取是否已经参与比赛
-const getUserIsJoinedMatch = (matchId, openId) =>
+REQ.getUserIsJoinedMatch = (matchId, openId) =>
     fetch(`/api/match/isJoined?id=${matchId}&t=${openId}`).then((response) => {
         //返回 object 类型
         return response.json();
     });
 // 取消比赛
-const req_cancelMatch = (matchId, openId) =>
+REQ.cancelMatch = (matchId, openId) =>
     fetch(`/api/match/cancel?id=${matchId}&t=${openId}`).then((response) => {
         //返回 object 类型
         return response.json();
     });
+
+const REQ_DURATION = 3 * 1000;
+const REQ_TIMER = () => new Promise((r) =>
+    window.setTimeout(() => {
+        r({code:1, msg: '请求超时'});
+    }, REQ_DURATION)
+);
+Object.keys(REQ).forEach(key => {
+    let item = REQ[key];
+    REQ[key] = function () {
+        return Promise.race([item.apply(this, arguments), REQ_TIMER()]);
+    };
+});
+
+const failMsg = result => {
+    if(!result || result.code != 0){
+        return result && result.msg || '服务器错误';
+    }
+};

@@ -14,14 +14,6 @@ class UserService extends Service {
         return await app.mysql.get(TABLE_NAME, options);
     }
     /**
-     * 获取
-     */
-    async getByOpenId(open_id) {
-        const { app } = this;
-        return await app.mysql.get(TABLE_NAME, {open_id});
-    }
-
-    /**
      * 增加
      * @param {Object} item
      */

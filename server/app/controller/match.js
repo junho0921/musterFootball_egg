@@ -7,7 +7,7 @@ const {max_login_duration, splitWord} = require('../../config/CONST');
 class MatchController extends Controller {
     async get() {
         const { ctx, app } = this;
-        const query = this.ctx.query;
+        const query = ctx.query;
         let match_id = query.id;
         if (!match_id){
             ctx.body = new Error('参数错误');
@@ -20,7 +20,7 @@ class MatchController extends Controller {
             where: {match_id}
         });
         if(!matchs || !matchs.length){
-            ctx.body = null;
+            ctx.body = new Error('没有比赛信息');
             return;
         }
         let members_openIds = matchs.reduce((sum, item) => {
@@ -51,7 +51,7 @@ class MatchController extends Controller {
                 })
             }
         })
-        ctx.body = matchs
+        ctx.body = matchs;
     }
 
     async isJoined() {
@@ -61,7 +61,7 @@ class MatchController extends Controller {
             return
         }
         const {match_id, open_id, userInfo, matchInfo} = res;
-        ctx.body = matchInfo.members.includes(open_id) ? 1 : 0
+        ctx.body = matchInfo.members.includes(open_id) ? 1 : 0;
     }
 
     async cancel(){
@@ -73,14 +73,14 @@ class MatchController extends Controller {
         const {match_id, open_id, userInfo, matchInfo} = res
 
         if (matchInfo.leader != open_id){
-            ctx.body = new Error('您不是比赛的发起者，不能取消比赛')
+            ctx.body = new Error('您不是比赛的发起者，不能取消比赛');
             return
         }
         let deleteSuccess = await ctx.service.match.delete({
             match_id
         })
         if (!deleteSuccess){
-            ctx.body = new Error('取消失败')
+            ctx.body = new Error('取消失败');
             return
         }
         let newList = userInfo.muster_match.split(splitWord).filter(item => item != match_id)
@@ -89,7 +89,7 @@ class MatchController extends Controller {
             where: {open_id}
         })
         if (!updateSuccess){
-            ctx.body = new Error('更新用户信息失败')
+            ctx.body = new Error('更新用户信息失败');
             return
         }
         ctx.body = 1
@@ -102,14 +102,14 @@ class MatchController extends Controller {
         let open_id = query.t
 
         if (!match_id || !open_id){
-            ctx.body = new Error('参数错误')
+            ctx.body = new Error('参数错误');
             return
         }
 
         // 查询当前登录用户信息
         const userInfo = await ctx.service.user.get({open_id})
         if (!userInfo) {
-            app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo))
+            // app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo))
             ctx.body = new Error('请先登陆')
             return
         }
