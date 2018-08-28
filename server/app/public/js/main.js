@@ -1,5 +1,9 @@
 let pageMatchId = location.hash.match(/matchId=(\w+)/);
 let EVENT = {};
+const DOM = {
+    musters: '#musterMatchDetailList',
+    joins: '#joinMatchDetailList',
+};
 const app = {
     // 页面的比赛信息
     match: null,
@@ -55,25 +59,48 @@ const app = {
         }
         app.user = result.data;
         $('.name').text(app.user.name + '，欢迎你');
-        return result && result.data.muster_match;
-    }).then(matchs => {
-        if(matchs){
-            REQ.getMatchInfo(matchs).then((result) => {
+        return result;
+    }).then(() => {
+        app.renderMusterMatchList();
+        app.renderJoinMatchList();
+    }),
+    renderMusterMatchList: function () {
+        let {muster_match} = app.user;
+        if(muster_match){
+            REQ.getMatchInfo(muster_match).then((result) => {
                 if(failMsg(result)){
                     return;
                 }
-                if(result && result.data){
+                if(result.data){
                     app.muster_match = result.data;
-                    $('#matchDetailList').html(
+                    $(DOM.musters).html(
                         renderMatchList(result.data)
                     ).show();
                     EVENT.editMatch();
                 }
             });
         }else{
-            $('#matchDetailList').html('').hide();
+            $(DOM.musters).html('').hide();
         }
-    })
+    },
+    renderJoinMatchList: function () {
+        let {join_match} = app.user;
+        if(join_match){
+            REQ.getMatchInfo(join_match).then((result) => {
+                if(failMsg(result)){
+                    return;
+                }
+                if(result.data){
+                    app.join_match = result.data;
+                    $(DOM.joins).html(
+                        renderJoinMatchList(result.data)
+                    ).show();
+                }
+            });
+        }else{
+            $(DOM.joins).html('').hide();
+        }
+    }
 };
 // 弹窗
 EVENT.popWinMask = () =>
@@ -168,7 +195,7 @@ EVENT.submitMatch = (onSubmit, matchInfo) =>
     });
 // 提交比赛表格
 EVENT.deleteMatch = () =>
-    $('#matchDetailList').on('click', '.deleteMatch', function (e) {
+    $(DOM.musters).on('click', '.deleteMatch', function (e) {
         if(!app.user.open_id){
             return alert('未登陆');
         }
@@ -188,7 +215,7 @@ EVENT.deleteMatch = () =>
     });
 // 分享比赛
 EVENT.shareMatch = () =>
-    $('#matchDetailList').on('click', '.shareMatch', function (e) {
+    $(DOM.musters).on('click', '.shareMatch', function (e) {
         if(!app.user.open_id){
             return alert('未登陆');
         }

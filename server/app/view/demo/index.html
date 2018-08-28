@@ -1,46 +1,40 @@
 <html>
 <head>
-    <title>DEMO</title>
+    <title>组队踢球吧</title>
     <link rel="stylesheet" href="/public/css/main.css" />
 </head>
 <body>
-
-<div>
-    {% for item in members %}
-    <button class="login" data-type="{{item.type}}">{{ item.name }} 登陆</button>
-    {% endfor %}
-    <div class="name"></div>
-</div>
-
-<div class="table">
-    <h2 id="editUserInfo">更新信息</h2>
-</div>
-
-<div class="table">
-    <h2 id="musterMatch">发起比赛</h2>
-</div>
-
-<div id="popWin">
-    <div class="mask"></div>
-    <div class="content"></div>
-</div>
-
-<div class="table">
-    <div id="matchDetailList"></div>
-</div>
-
-<div class="table" id="joinMatchPanel">
-    <h2>报名比赛</h2>
     <div>
+        {% for item in members %}
+        <button class="login" data-type="{{item.type}}">{{ item.name }} 登陆</button>
+        {% endfor %}
+        <div class="name"></div>
+    </div>
+    <div class="table" id="joinMatchPanel">
         <h4>比赛信息</h4>
         <div id="matchDetail"></div>
         <button class="memberControl joinMatch">报个名</button>
         <button class="memberControl cancelJoinMatch">取消报名</button>
-        <!--<input type="text" id="matchId">-->
-        <!--<button id="getMatchInfo">获取比赛信息</button>-->
     </div>
-</div>
-
+    <div class="table">
+        <h2 id="editUserInfo">更新信息</h2>
+    </div>
+    <div class="table">
+        <h2 id="musterMatch">发起比赛</h2>
+    </div>
+    <!--我组织的比赛-->
+    <div class="table">
+        <div id="musterMatchDetailList"></div>
+    </div>
+    <!--我参加的比赛-->
+    <div class="table">
+        <div id="joinMatchDetailList"></div>
+    </div>
+    <!--弹窗-->
+    <div id="popWin">
+        <div class="mask"></div>
+        <div class="content"></div>
+    </div>
 </body>
 <script src="/public/js/jquery/dist/jquery.js"></script>
 <script async="" src="/public/js/template.js"></script>

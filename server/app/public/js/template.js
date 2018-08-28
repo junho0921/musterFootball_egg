@@ -3,11 +3,21 @@ const renderMatchList = json => (
     <ul>
         ${json.map(item => (
         `<li class="matchItem">
-                ${renderMatchInfo(item)}
-                <button class="deleteMatch" data-match="${item.match_id}">删除</button>
-                <button class="shareMatch" data-match="${item.match_id}">邀请</button>
-                <button class="editMatch" data-match="${item.match_id}">编辑</button>
-            </li>`
+            ${renderMatchInfo(item)}
+            <button class="deleteMatch" data-match="${item.match_id}">删除</button>
+            <button class="shareMatch" data-match="${item.match_id}">邀请</button>
+            <button class="editMatch" data-match="${item.match_id}">编辑</button>
+        </li>`
+    )).join('')}
+    </ul>`
+);
+const renderJoinMatchList = json => (
+    `<h2>我参加的比赛</h2>
+    <ul>
+        ${json.map(item => (
+        `<li class="matchItem">
+            ${renderMatchInfo(item)}
+        </li>`
     )).join('')}
     </ul>`
 );
