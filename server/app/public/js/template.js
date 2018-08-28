@@ -11,7 +11,7 @@ const renderMatchList = json => (
     )).join('')}
     </ul>`
 );
-const renderJoinMatchList = (json, open_id, title) => (
+const renderJoinMatchList = (json, title) => (
     `<h2>${title || '比赛信息'}</h2>
     <ul>
         ${json.map(item => (

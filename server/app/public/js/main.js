@@ -1,9 +1,9 @@
 let pageMatchId = location.hash.match(/matchId=(\w+)/)
-let EVENT = {}
+let EVENT = {};
 const DOM = {
     musters: '#musterMatchDetailList',
     joins: '#joinMatchDetailList',
-}
+};
 const app = {
     // 页面的比赛信息
     match: null,
@@ -26,7 +26,7 @@ const app = {
             if(matchInfo){
                 app.match = matchInfo;
                 $('#matchDetail').html(
-                    renderJoinMatchList([matchInfo], app.user.open_id, '比赛信息')
+                    renderJoinMatchList([matchInfo], '比赛信息')
                 );
             }
         })
@@ -96,7 +96,7 @@ const app = {
                     app.join_match = result.data;
                     app.join_match.forEach(i => i.isJoined = true);
                     $(DOM.joins).html(
-                        renderJoinMatchList(result.data, app.user.open_id, '我参加的比赛')
+                        renderJoinMatchList(result.data, '我参加的比赛')
                     ).show()
                 }
             })
@@ -119,8 +119,10 @@ EVENT.login = () =>
                         return alert(failMsg(result));
                     }
                     let isJoined = result && !!result.data;
-                    app.match.isJoined = isJoined;
-                    $('#matchDetail').html(renderJoinMatchList([app.match], app.user.open_id, '比赛信息'))
+                    if(isJoined){
+                        app.match.isJoined = isJoined;
+                        $('#matchDetail').html(renderJoinMatchList([app.match], '比赛信息'));
+                    }
                 })
             }
         })
@@ -213,9 +215,9 @@ EVENT.deleteMatch = () =>
                 if(result.data === 1){
                     $e.parents('.matchItem').remove()
                 }
-            })
+            });
         }
-    })
+    });
 // 分享比赛
 EVENT.shareMatch = () =>
     $(DOM.musters).on('click', '.shareMatch', function (e) {
@@ -228,7 +230,7 @@ EVENT.shareMatch = () =>
             window.location.hash = `matchId=${matchId}`
             window.location.reload()
         }
-    })
+    });
 // 报名比赛
 EVENT.joinMatch = () =>
     $('body').on('click', '.joinMatch', function (e) {
@@ -252,7 +254,7 @@ EVENT.joinMatch = () =>
         }else{
             return alert('页面没有比赛信息')
         }
-    })
+    });
 // 取消报名比赛
 EVENT.cancelJoinMatch = () =>
     $('body').on('click', '.cancelJoinMatch', function (e) {
@@ -276,6 +278,6 @@ EVENT.cancelJoinMatch = () =>
         }else{
             return alert('页面没有比赛信息')
         }
-    })
+    });
 // 初始化
-app.init()
+app.init();
