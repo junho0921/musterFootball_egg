@@ -11,12 +11,15 @@ const renderMatchList = json => (
     )).join('')}
     </ul>`
 );
-const renderJoinMatchList = json => (
-    `<h2>我参加的比赛</h2>
+const renderJoinMatchList = (json, open_id, title) => (
+    `<h2>${title || '比赛信息'}</h2>
     <ul>
         ${json.map(item => (
         `<li class="matchItem">
             ${renderMatchInfo(item)}
+            ${ item.isJoined ? 
+            `<button class="cancelJoinMatch" data-match="${item.match_id}">取消报名</button>`:
+            `<button class="joinMatch" data-match="${item.match_id}">报个名</button>`}
         </li>`
     )).join('')}
     </ul>`
