@@ -223,30 +223,27 @@ class MatchController extends Controller {
     async muster() {
         const { ctx, app } = this
         const data = ctx.request.body
-        console.log('组队信息', data)
         // // 参数校验
         if (!data.openId || !data.date || !data.position) {
-            ctx.body = new Error('数据填写有误')
+            ctx.body = new Error('数据填写有误');
             return
         }
 
         // 查询当前登录用户信息
-        const userInfo = await ctx.service.user.get({open_id: data.openId})
+        const userInfo = await ctx.service.user.get({open_id: data.openId});
         if (!userInfo) {
-            app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo))
-            ctx.body = new Error('请先登录')
+            app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo));
+            ctx.body = new Error('请先登录');
             return
         }else{
-            console.log('=============', userInfo)
             const overLen = Date.now() - userInfo.last_login_time > max_login_duration
-            console.log('=============', Date.now() - userInfo.last_login_time)
             if(overLen){
-                ctx.body = new Error('登陆超时')
+                ctx.body = new Error('登陆超时');
                 return
             }
         }
 
-        const match_id = 'mid_' + Date.now()
+        const match_id = 'mid_' + Date.now();
         const ret = await ctx.service.match.add({
             match_id,
             leader: data.openId,
@@ -255,26 +252,67 @@ class MatchController extends Controller {
             max_numbers: data.maxNumbers || 100,
             position: data.position,
             members: '',
-        })
-        console.log('存储比赛', ret)
+        });
         if (!ret) {
-            ctx.body = new Error('服务器失败')
+            ctx.body = new Error('服务器失败');
             return
         }
         // 更新个人组队信息
         if(userInfo.muster_match.length > 0){
             userInfo.muster_match += splitWord
         }
-        userInfo.muster_match += match_id
+        userInfo.muster_match += match_id;
         const userRet = await ctx.service.user.update(userInfo, {
             where: {open_id: data.openId}
-        })
+        });
         if (!userRet) {
-            ctx.body = new Error('更新个人组队信息失败')
+            ctx.body = new Error('更新个人组队信息失败');
             return
         }
         ctx.body = 1
     }
+    async edit() {
+        const { ctx, app } = this;
+        const data = ctx.request.body;
+        console.log('组队信息', data);
+        // // 参数校验
+        if (!data.openId || !data.date || !data.position || !data.match_id) {
+            ctx.body = new Error('数据填写有误');
+            return
+        }
+
+        // 查询当前登录用户信息
+        const userInfo = await ctx.service.user.get({open_id: data.openId});
+        if (!userInfo) {
+            app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo))
+            ctx.body = new Error('请先登录');
+            return
+        }else{
+            const overLen = Date.now() - userInfo.last_login_time > max_login_duration;
+            if(overLen){
+                ctx.body = new Error('登陆超时');
+                return
+            }
+        }
+
+        const match_id = data.match_id;
+        const ret = await ctx.service.match.update({
+            match_id,
+            leader: data.openId,
+            type: data.type || 5,
+            date: data.date,
+            max_numbers: data.maxNumbers || 100,
+            position: data.position,
+            members: '',
+        }, {
+            where: {match_id}
+        });
+        if (!ret) {
+            ctx.body = new Error('更新比赛信息失败');
+            return
+        }
+        ctx.body = 1;
+    }
 }
 
-module.exports = MatchController
+module.exports = MatchController;

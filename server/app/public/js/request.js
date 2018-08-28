@@ -18,18 +18,14 @@ REQ.getInfo = type =>
     fetch(`/api/user/login${type?'?type='+type:''}`)
         .then(res => res.json());
 // 更新用户信息
-REQ.updateInfo = (phone, name, openId) =>
+REQ.updateInfo = (userInfo) =>
     fetch('/api/user/update', {
         method: 'POST',
         mode: 'cors',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            phone: phone || Date.now(),
-            name: name,
-            openId: openId
-        })
+        body: JSON.stringify(userInfo)
     }).then((response) => {
         //返回 object 类型
         return response.json();
@@ -37,6 +33,19 @@ REQ.updateInfo = (phone, name, openId) =>
 // 发起比赛
 REQ.musterMatch = data =>
     fetch('/api/match/muster', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then((response) => {
+        //返回 object 类型
+        return response.json();
+    });
+// 编辑比赛
+REQ.editMatch = data =>
+    fetch('/api/match/edit', {
         method: 'POST',
         mode: 'cors',
         headers: {

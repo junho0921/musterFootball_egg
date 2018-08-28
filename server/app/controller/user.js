@@ -39,7 +39,7 @@ class UserController extends Controller {
     async update() {
         const { ctx } = this;
         const data = ctx.request.body;
-        const open_id = data.openId;
+        const open_id = data.open_id;
         if (!open_id) {
             ctx.body = new Error('无登陆信息');
             return;
@@ -48,6 +48,7 @@ class UserController extends Controller {
             open_id,
             name: data.name || '默认姓名',
             phone: data.phone || 888,
+            real_name: data.real_name || '',
         }, {
             where: {open_id}
         });

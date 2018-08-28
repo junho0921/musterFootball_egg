@@ -47,7 +47,6 @@ class RemarkService extends Service {
         const { app } = this;
         item.updated_by = parseInt(new Date().getTime() / 1000);
         const result = await app.mysql.update(TABLE_NAME, item, options);
-        console.log('更新信息', result)
         return result && result.affectedRows === 1;
     }
 

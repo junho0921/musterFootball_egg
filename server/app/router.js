@@ -10,6 +10,7 @@ module.exports = app => {
     router.post('/api/user/update', wrap, controller.user.update);
     // 比赛
     router.post('/api/match/muster', wrap, controller.match.muster);
+    router.post('/api/match/edit', wrap, controller.match.edit);
     router.get('/api/match/get', wrap, controller.match.get);
     router.get('/api/match/cancel', wrap, controller.match.cancel);
     router.get('/api/match/join', wrap, controller.match.join);
