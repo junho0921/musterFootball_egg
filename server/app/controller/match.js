@@ -2,11 +2,11 @@
 
 const Controller = require('egg').Controller;
 
-const {max_login_duration, splitWord} = require('../../config/CONST');
+const {splitWord} = require('../../config/CONST');
 
 class MatchController extends Controller {
     async get() {
-        const { ctx, app } = this;
+        const { ctx } = this;
         const query = ctx.query;
         let match_id = query.id;
         if (!match_id){
@@ -42,11 +42,11 @@ class MatchController extends Controller {
         });
         matchs.forEach(item => {
             item.leader = Object.assign({}, membersInfo.find(i => i.open_id == item.leader));
-            delete item.leader.open_id;
+            // delete item.leader.open_id;
             if(item.members){
                 item.members = item.members.map(id => {
                     let info = Object.assign({}, membersInfo.find(i => i.open_id == id));
-                    delete info.open_id;
+                    // delete info.open_id;
                     return info;
                 })
             }
@@ -109,25 +109,26 @@ class MatchController extends Controller {
         const { ctx, app } = this;
         const query = ctx.query;
         let match_id = query.id;
-        let open_id = query.t;
-
-        if (!match_id || !open_id){
+        if (!match_id){
             ctx.body = new Error('参数错误');
             return
         }
-
+        if (ctx.state.$wxInfo.loginState !== 1) {
+            ctx.body = new Error('登陆状态失败');
+            return;
+        }
+        let data = ctx.state.$wxInfo.userinfo;
+        let open_id = data.open_id;
         // 查询当前登录用户信息
-        const userInfo = await ctx.service.user.get({open_id})
+        const userInfo = await ctx.service.user.get({open_id});
         if (!userInfo) {
-            // app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo))
             ctx.body = new Error('请先登陆');
             return
         }
-
         // 查询比赛信息
-        const matchInfo = await ctx.service.match.get({ match_id })
+        const matchInfo = await ctx.service.match.get({ match_id });
         if (!matchInfo) {
-            app.logger.error('获取比赛信息异常: ' + JSON.stringify(matchInfo))
+            app.logger.error('获取比赛信息异常: ' + JSON.stringify(matchInfo));
             ctx.body = new Error('无此比赛信息')
             return
         }
@@ -155,13 +156,6 @@ class MatchController extends Controller {
             ctx.body = new Error('已经报名')
             return
         }
-
-        // // 查询当前用户是否队长
-        // if (matchInfo.leader == open_id) {
-        //     app.logger.error('您是队长，无需报名')
-        //     ctx.body = new Error('您是队长，无需报名')
-        //     return
-        // }
 
         // 更新比赛成员信息
         if(matchInfo.members.length > 0){
@@ -196,13 +190,6 @@ class MatchController extends Controller {
         }
         const {match_id, open_id, userInfo, matchInfo} = res;
 
-        // // 查询当前用户是否队长
-        // if (matchInfo.leader == open_id) {
-        //     app.logger.error('您是队长，不能取消报名');
-        //     ctx.body = new Error('您是队长，不能取消报名');
-        //     return
-        // }
-
         // 查询当前用户是否已经报名此比赛
         if (!matchInfo.members.includes(userInfo.open_id)) {
             app.logger.error('您还没有报名');
@@ -235,18 +222,22 @@ class MatchController extends Controller {
 
     async muster() {
         const { ctx, app } = this;
+        if (ctx.state.$wxInfo.loginState !== 1) {
+            ctx.body = new Error('登陆状态失败');
+            return;
+        }
+        let {open_id} = ctx.state.$wxInfo.userinfo;
         const data = ctx.request.body;
-        // // 参数校验
-        if (!data.openId || !data.date || !data.position) {
-            ctx.body = new Error('数据填写有误');
+        // 参数校验
+        if (!data.date || !data.position) {
+            ctx.body = new Error('比赛数据缺失');
             return
         }
-
         // 查询当前登录用户信息
-        const userInfo = await ctx.service.user.get({open_id: data.openId});
+        const userInfo = await ctx.service.user.get({open_id});
         if (!userInfo) {
             app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo));
-            ctx.body = new Error('请先登录');
+            ctx.body = new Error('获取当前用户信息异常');
             return
         }else{
             // 检查用户的信息登记情况
@@ -254,24 +245,19 @@ class MatchController extends Controller {
                 ctx.body = new Error('请先登记信息');
                 return
             }
-            const overLen = Date.now() - userInfo.last_login_time > max_login_duration
-            if(overLen){
-                ctx.body = new Error('登陆超时');
-                return
-            }
         }
-
+        // 创建比赛id
         const match_id = 'mid_' + Date.now();
         const ret = await ctx.service.match.add({
             match_id,
-            leader: data.openId,
+            leader: open_id,
             type: data.type || 5,
             date: data.date,
             max_numbers: data.maxNumbers || 100,
             position: data.position,
             canceled: 0,
             canceled_reason: '',
-            members: data.openId,
+            members: open_id,
         });
         if (!ret) {
             ctx.body = new Error('服务器失败');
@@ -281,7 +267,7 @@ class MatchController extends Controller {
         userInfo.muster_match += (userInfo.muster_match && splitWord || '') + match_id;
         userInfo.join_match += (userInfo.join_match && splitWord || '') + match_id;
         const userRet = await ctx.service.user.update(userInfo, {
-            where: {open_id: data.openId}
+            where: {open_id}
         });
         if (!userRet) {
             ctx.body = new Error('更新个人组队信息失败');
@@ -291,37 +277,30 @@ class MatchController extends Controller {
     }
     async edit() {
         const { ctx, app } = this;
+        if (ctx.state.$wxInfo.loginState !== 1) {
+            ctx.body = new Error('登陆状态失败');
+            return;
+        }
+        let {open_id} = ctx.state.$wxInfo.userinfo;
         const data = ctx.request.body;
-        console.log('组队信息', data);
-        // // 参数校验
-        if (!data.openId || !data.date || !data.position || !data.match_id) {
+        // 参数校验
+        if (!data.date || !data.position || !data.match_id) {
             ctx.body = new Error('数据填写有误');
             return
         }
-
         // 查询当前登录用户信息
-        const userInfo = await ctx.service.user.get({open_id: data.openId});
+        const userInfo = await ctx.service.user.get({open_id});
         if (!userInfo) {
-            app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo))
-            ctx.body = new Error('请先登录');
+            app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo));
+            ctx.body = new Error('获取当前用户信息异常');
             return
-        }else{
-            const overLen = Date.now() - userInfo.last_login_time > max_login_duration;
-            if(overLen){
-                ctx.body = new Error('登陆超时');
-                return
-            }
         }
-
         const match_id = data.match_id;
         const ret = await ctx.service.match.update({
-            match_id,
-            leader: data.openId,
             type: data.type || 5,
             date: data.date,
             max_numbers: data.maxNumbers || 100,
             position: data.position,
-            members: '',
         }, {
             where: {match_id}
         });

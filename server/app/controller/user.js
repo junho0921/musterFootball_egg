@@ -2,14 +2,16 @@
 
 const Controller = require('egg').Controller;
 
-const {getUserInfo} = require('../tools/wx_login');
-
 class UserController extends Controller {
     async login() {
         const { ctx } = this;
-        const {type} = ctx.query;
-        const data = getUserInfo(type);
-        const open_id = data.openId;
+        if (ctx.state.$wxInfo.loginState !== 1) {
+            ctx.body = new Error('登陆状态失败');
+            return;
+        }
+        let data = ctx.state.$wxInfo.userinfo;
+        const open_id = data.open_id;
+        // 维护一套用户信息数据库，区别与微信cSessionInfo数据库
         let userInfo = await ctx.service.user.get({open_id});
         if (!userInfo) {
             userInfo = {
@@ -35,22 +37,22 @@ class UserController extends Controller {
                 where: {open_id}
             });
         }
-        ctx.body = userInfo;
+        data.p_user_info = userInfo;
+        // 必须返回auth中间件的数据，这样才能被微信识别skey
+        ctx.body = data;
     }
 
     async update() {
         const { ctx } = this;
-        const data = ctx.request.body;
-        const open_id = data.open_id;
-        if (!open_id) {
-            ctx.body = new Error('无登陆信息');
+        if (ctx.state.$wxInfo.loginState !== 1) {
+            ctx.body = new Error('登录态校验失败');
             return;
         }
+        const {open_id} = ctx.state.$wxInfo.userinfo;
+        const data = ctx.request.body;
         const ret = await ctx.service.user.update({
-            open_id,
-            name: data.name || '默认姓名',
             phone: data.phone || 888,
-            real_name: data.real_name || '',
+            real_name: data.real_name || ''
         }, {
             where: {open_id}
         });

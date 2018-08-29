@@ -6,32 +6,33 @@ const imgURL = [
 
 const user = [
     {
-        type: 9,
         name: 'leader',
+        skey: '10',
         wx_img: imgURL[0],
-        openId: 10000
+        open_id: 10000
     },
     {
-        type: 1,
         name: 'member_1',
+        skey: '12',
         wx_img: imgURL[1],
-        openId: 300001
+        open_id: 300001
     },
     {
-        type: 2,
         name: 'member_2',
+        skey: '13',
         wx_img: imgURL[1],
-        openId: 300002
+        open_id: 300002
     },
     {
-        type: 3,
         name: 'member_3',
+        skey: '14',
         wx_img: imgURL[1],
-        openId: 300003
+        open_id: 300003
     }
 ];
+user.forEach(item => item.type = item.skey);
 
 module.exports = {
     members: user,
-    getUserInfo: (type) => user.find(item => item.type == type)
+    getUserInfoBySessionKey: (skey) => user.find(item => item.skey == skey)
 };

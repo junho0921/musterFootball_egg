@@ -55,11 +55,11 @@ const app = {
         $('#popWin').css('display', 'flex')
         EVENT.updateInfo()
     },
-    getUserInfo: () => REQ.getInfo(app.userType).then((result) => {
+    getUserInfo: () => REQ.getInfo().then((result) => {
         if(failMsg(result)){
             return alert(failMsg(result))
         }
-        app.user = result.data
+        app.user = result.data.p_user_info;
         $('.name').text(app.user.name + '，欢迎你')
         return result
     }).then(() => {
@@ -212,7 +212,7 @@ EVENT.deleteMatch = () =>
         let reason = $('#reason').val();
         if(matchId){
             console.log('删除', matchId)
-            return REQ.cancelMatch(matchId, app.user.open_id, reason || '无理由取消了，唔好意思').then(result => {
+            return REQ.cancelMatch(matchId, reason || '无理由取消了，唔好意思').then(result => {
                 if(failMsg(result)){
                     return alert(failMsg(result))
                 }

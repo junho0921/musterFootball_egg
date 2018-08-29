@@ -3,19 +3,23 @@
 module.exports = app => {
     const { router, controller, middlewares } = app;
     const wrap = middlewares.wrap();
+    const {
+        authorizationMiddleware,
+        validationMiddleware
+    } = middlewares.auth();
     // 页面
     router.get('/', controller.home.index);
     // 用户
-    router.get('/api/user/login', wrap, controller.user.login);
-    router.post('/api/user/update', wrap, controller.user.update);
+    router.get('/api/user/login', wrap, authorizationMiddleware, controller.user.login);
+    router.post('/api/user/update', wrap, validationMiddleware, controller.user.update);
     // 比赛
-    router.post('/api/match/muster', wrap, controller.match.muster);
-    router.post('/api/match/edit', wrap, controller.match.edit);
+    router.post('/api/match/muster', wrap, validationMiddleware, controller.match.muster);
+    router.post('/api/match/edit', wrap, validationMiddleware, controller.match.edit);
+    router.get('/api/match/cancel', wrap, validationMiddleware, controller.match.cancel);
+    router.get('/api/match/join', wrap, validationMiddleware, controller.match.join);
+    router.get('/api/match/regret', wrap, validationMiddleware, controller.match.regret);
     router.get('/api/match/get', wrap, controller.match.get);
-    router.get('/api/match/cancel', wrap, controller.match.cancel);
-    router.get('/api/match/join', wrap, controller.match.join);
     router.get('/api/match/isJoined', wrap, controller.match.isJoined);
-    router.get('/api/match/regret', wrap, controller.match.regret);
 };
 
 /*
