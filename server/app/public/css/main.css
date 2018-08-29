@@ -50,3 +50,7 @@
     height: 80vh;
     background: #fff;
 }
+
+.canceled{
+    opacity: 0.6;
+}

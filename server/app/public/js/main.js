@@ -74,9 +74,10 @@ const app = {
                     return
                 }
                 if(result.data){
-                    app.muster_match = result.data
+                    app.muster_match = result.data;
+                    app.muster_match.forEach(item => item.isJoined = app.user.join_match.includes(item.match_id));
                     $(DOM.musters).html(
-                        renderMatchList(result.data)
+                        renderMusterMatchList(app.muster_match)
                     ).show()
                     EVENT.editMatch()
                 }
@@ -132,8 +133,8 @@ EVENT.editUserInfo = () =>
     $('#editUserInfo').click(app.popUserFormWin)
 EVENT.updateInfo = () =>
     $('#update').click(() => {
-        let phone = $('#phone').val() || app.user.phone
-        let real_name = $('#realName').val() || app.user.phone
+        let phone = $('#phone').val() || app.user.phone;
+        let real_name = $('#realName').val() || app.user.real_name;
         REQ.updateInfo(Object.assign({}, app.user, {
             phone,
             real_name
@@ -144,7 +145,7 @@ EVENT.updateInfo = () =>
             app.getUserInfo()
             app.hidePopWin()
         })
-    })
+    });
 // 发起比赛
 EVENT.muster = () =>
     $('#musterMatch').click(function () {
@@ -184,17 +185,19 @@ EVENT.submitMatch = (onSubmit, matchInfo) =>
         if(!app.user.open_id){
             return alert('请登录')
         }
-        let type = $form.find('[name=matchType]:checked').val() || matchInfo.type
-        let position = $form.find('#position').val() || matchInfo.position
-        let date = $form.find('#matchDate').val() || matchInfo.date
-        let maxNumbers = $form.find('#maxNumbers').val() || matchInfo.max_numbers
+        let type = $form.find('[name=matchType]:checked').val();
+        let position = $form.find('#position').val();
+        let date = $form.find('#matchDate').val();
+        let maxNumbers = $form.find('#maxNumbers').val();
+        let match_tips = $form.find('#match_tips').val();
         let data = {
             openId: app.user.open_id,
             type,
             maxNumbers,
+            match_tips,
             position,
             date
-        }
+        };
         console.log('data', data)
         onSubmit(data)
     })
@@ -242,14 +245,15 @@ EVENT.joinMatch = () =>
         let match_id = $btn.data('match');
         $btn.hide();
         if(match_id){
-            REQ.joinMatch(app.matchId, app.user.open_id)
+            REQ.joinMatch(match_id, app.user.open_id)
                 .then(result => {
                     if(failMsg(result)){
                         $btn.show();
                         return alert(failMsg(result))
                     }
                     if(result.data === 1){
-                        app.loadMatchInfo()
+                        app.getUserInfo()
+                        // app.loadMatchInfo()
                     }
                 })
         }else{
@@ -273,7 +277,8 @@ EVENT.cancelJoinMatch = () =>
                         return alert(failMsg(result))
                     }
                     if(result.data === 1){
-                        app.loadMatchInfo()
+                        app.getUserInfo()
+                        // app.loadMatchInfo()
                     }
                 })
         }else{

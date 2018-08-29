@@ -20,6 +20,8 @@ class UserController extends Controller {
                 wx_img: data.wx_img,
                 real_name: '',
                 join_match: '',
+                regret_join_match: '',
+                cancel_muster_match: '',
                 muster_match: ''
             };
             const ret = await ctx.service.user.add(userInfo);

@@ -120,7 +120,7 @@ class MatchController extends Controller {
         const userInfo = await ctx.service.user.get({open_id})
         if (!userInfo) {
             // app.logger.error('获取当前用户信息异常: ' + JSON.stringify(userInfo))
-            ctx.body = new Error('请先登陆')
+            ctx.body = new Error('请先登陆');
             return
         }
 
@@ -135,26 +135,33 @@ class MatchController extends Controller {
     }
 
     async join() {
-        const { ctx, app } = this
-        const res = await this.getMatchUser()
+        const { ctx, app } = this;
+        const res = await this.getMatchUser();
         if(!res){
             return
         }
-        const {match_id, open_id, userInfo, matchInfo} = res
+        const {match_id, open_id, userInfo, matchInfo} = res;
+
+        // 检查用户的信息登记情况
+        if(!userInfo.phone || !userInfo.real_name){
+            ctx.body = new Error('报名前，请先登记信息');
+            return
+        }
 
         // 查询当前用户是否已经报名此比赛
         if (matchInfo.members.includes(userInfo.open_id)) {
-            app.logger.error('已经报名')
+            console.log('matchInfo===========', matchInfo)
+            app.logger.error('已经报名', matchInfo)
             ctx.body = new Error('已经报名')
             return
         }
 
-        // 查询当前用户是否队长
-        if (matchInfo.leader == open_id) {
-            app.logger.error('您是队长，无需报名')
-            ctx.body = new Error('您是队长，无需报名')
-            return
-        }
+        // // 查询当前用户是否队长
+        // if (matchInfo.leader == open_id) {
+        //     app.logger.error('您是队长，无需报名')
+        //     ctx.body = new Error('您是队长，无需报名')
+        //     return
+        // }
 
         // 更新比赛成员信息
         if(matchInfo.members.length > 0){
@@ -189,12 +196,12 @@ class MatchController extends Controller {
         }
         const {match_id, open_id, userInfo, matchInfo} = res;
 
-        // 查询当前用户是否队长
-        if (matchInfo.leader == open_id) {
-            app.logger.error('您是队长，不能取消报名');
-            ctx.body = new Error('您是队长，不能取消报名');
-            return
-        }
+        // // 查询当前用户是否队长
+        // if (matchInfo.leader == open_id) {
+        //     app.logger.error('您是队长，不能取消报名');
+        //     ctx.body = new Error('您是队长，不能取消报名');
+        //     return
+        // }
 
         // 查询当前用户是否已经报名此比赛
         if (!matchInfo.members.includes(userInfo.open_id)) {
@@ -227,8 +234,8 @@ class MatchController extends Controller {
     }
 
     async muster() {
-        const { ctx, app } = this
-        const data = ctx.request.body
+        const { ctx, app } = this;
+        const data = ctx.request.body;
         // // 参数校验
         if (!data.openId || !data.date || !data.position) {
             ctx.body = new Error('数据填写有误');
@@ -242,6 +249,11 @@ class MatchController extends Controller {
             ctx.body = new Error('请先登录');
             return
         }else{
+            // 检查用户的信息登记情况
+            if(!userInfo.phone || !userInfo.real_name){
+                ctx.body = new Error('请先登记信息');
+                return
+            }
             const overLen = Date.now() - userInfo.last_login_time > max_login_duration
             if(overLen){
                 ctx.body = new Error('登陆超时');
@@ -258,18 +270,16 @@ class MatchController extends Controller {
             max_numbers: data.maxNumbers || 100,
             position: data.position,
             canceled: 0,
-            canceled_reason: null,
-            members: '',
+            canceled_reason: '',
+            members: data.openId,
         });
         if (!ret) {
             ctx.body = new Error('服务器失败');
             return
         }
         // 更新个人组队信息
-        if(userInfo.muster_match.length > 0){
-            userInfo.muster_match += splitWord
-        }
-        userInfo.muster_match += match_id;
+        userInfo.muster_match += (userInfo.muster_match && splitWord || '') + match_id;
+        userInfo.join_match += (userInfo.join_match && splitWord || '') + match_id;
         const userRet = await ctx.service.user.update(userInfo, {
             where: {open_id: data.openId}
         });

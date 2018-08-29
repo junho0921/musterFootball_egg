@@ -1,4 +1,4 @@
-const renderMatchList = json => (
+const renderMusterMatchList = json => (
     `<h2>我组织的比赛</h2>
     <ul>
         ${json.map(item => (
@@ -8,6 +8,7 @@ const renderMatchList = json => (
             `<button class="deleteMatch" data-match="${item.match_id}">删除</button>
             <button class="shareMatch" data-match="${item.match_id}">邀请</button>
             <button class="editMatch" data-match="${item.match_id}">编辑</button>`) || ''}
+            ${matchJoinControl(item)}
         </li>`
     )).join('')}
     </ul>`
@@ -18,23 +19,25 @@ const renderJoinMatchList = (json, title) => (
         ${json.map(item => (
         `<li class="matchItem">
             ${renderMatchInfo(item)}
-            ${item.canceled == 0 && (item.isJoined ? 
-            `<button class="cancelJoinMatch" data-match="${item.match_id}">取消报名</button>`:
-            `<button class="joinMatch" data-match="${item.match_id}">报个名</button>`) || ''}
+            ${matchJoinControl(item)}
         </li>`
     )).join('')}
     </ul>`
 );
 
+const matchJoinControl = item => item.canceled == 0 && (item.isJoined ?
+    `<button class="cancelJoinMatch" data-match="${item.match_id}">取消报名</button>`:
+    `<button class="joinMatch" data-match="${item.match_id}">我也参加</button>`) || '';
+
 const renderMatchInfo = item => (`
-    <div class="${item.canceled && 'canceled' || ''}">
+    <div class="${item.canceled == 1 && 'canceled' || ''}">
         <div>比赛类型: ${item.type}</div>
         <div>地点: ${item.position}</div>
         <div>时间: ${item.date}</div>
         <div>最大人数: ${item.max_numbers}</div>
         <div>发起人: ${item.leader && renderUserSpan(item.leader)}</div>
         <div>报名人: ${item.members && item.members.length && item.members.map(renderUserSpan).join('')}</div>
-        ${item.canceled && `<div>取消理由: ${item.canceled_reason}</div>` || ''}
+        ${item.canceled_reason ? `<div>取消理由: ${item.canceled_reason}</div>` : ''}
     </div>
 `);
 
@@ -58,6 +61,10 @@ const renderMatchForm = (data = {type: 5}) => (
             <span>最大人数</span>
             <input type="number" placeholder="请输入最大人数" id="maxNumbers" value="${data.max_numbers || ''}">
         </label>
+        <label>
+            <span>比赛提示</span>
+            <input type="text" placeholder="请输入提示语" id="match_tips" value="${data.match_tips || ''}">
+        </label>
         <button class="muster">提交</button>
     </div>`
 );
@@ -65,8 +72,14 @@ const renderMatchForm = (data = {type: 5}) => (
 const renderUserForm = (data = {}) => (
     `<div class="updateForm">
         <span>联系方式</span>
-        <input type="text" placeholder="请输入真实姓名" id="realName" value="${data.real_name || ''}"/>
-        <input type="number" placeholder="请输入手机号" id="phone" value="${data.phone || ''}"/>
+        <label>
+            <h3>真实姓名</h3>
+            <input type="text" placeholder="请输入真实姓名" id="realName" value="${data.real_name || ''}"/>
+        </label>
+        <label>
+            <h3>电话号码（只对队长可见）</h3>
+            <input type="number" placeholder="请输入手机号" id="phone" value="${data.phone || ''}"/>
+        </label>
         <button id="update">提交</button>
     </div>`
 );
