@@ -28,10 +28,10 @@ class MatchController extends Controller {
                 sum = sum.concat(item.leader)
             }
             if(item.members){
-                item.members = item.members.split(splitWord)
-                sum = sum.concat(item.members)
+                item.members = item.members.split(splitWord);
+                sum = sum.concat(item.members);
             }
-            return sum
+            return sum;
         }, []);
         console.log('match--------', matchs)
         let membersInfo = await ctx.service.user.find({
@@ -50,56 +50,66 @@ class MatchController extends Controller {
                     return info;
                 })
             }
-        })
+        });
         ctx.body = matchs;
     }
 
     async isJoined() {
-        const { ctx } = this
-        const res = await this.getMatchUser()
+        const { ctx } = this;
+        const res = await this.getMatchUser();
         if(!res){
-            return
+            return;
         }
         const {match_id, open_id, userInfo, matchInfo} = res;
         ctx.body = matchInfo.members.includes(open_id) ? 1 : 0;
     }
 
     async cancel(){
-        const { ctx } = this
-        const res = await this.getMatchUser()
+        const { ctx } = this;
+        const res = await this.getMatchUser();
         if(!res){
             return
         }
-        const {match_id, open_id, userInfo, matchInfo} = res
+        const {match_id, open_id, userInfo, matchInfo} = res;
+        const {canceled_reason} = ctx.query;
 
         if (matchInfo.leader != open_id){
             ctx.body = new Error('您不是比赛的发起者，不能取消比赛');
             return
         }
-        let deleteSuccess = await ctx.service.match.delete({
-            match_id
-        })
-        if (!deleteSuccess){
+
+        if (!canceled_reason){
+            ctx.body = new Error('取消比赛须提交取消理由');
+            return
+        }
+
+        let cancelSuccess = await ctx.service.match.update(Object.assign({}, matchInfo, {
+            canceled: 1,
+            canceled_reason
+        }), {
+            where:{match_id}
+        });
+        if (!cancelSuccess){
             ctx.body = new Error('取消失败');
             return
         }
-        let newList = userInfo.muster_match.split(splitWord).filter(item => item != match_id)
-        userInfo.muster_match = newList.join(splitWord)
-        let updateSuccess = await ctx.service.user.update(userInfo, {
-            where: {open_id}
-        })
-        if (!updateSuccess){
-            ctx.body = new Error('更新用户信息失败');
-            return
-        }
+        // let newList = userInfo.muster_match.split(splitWord).filter(item => item != match_id)
+        // userInfo.muster_match = newList.join(splitWord)
+        // let updateSuccess = await ctx.service.user.update(userInfo, {
+        //     where: {open_id}
+        // })
+        // if (!updateSuccess){
+        //     ctx.body = new Error('更新用户信息失败');
+        //     return
+        // }
         ctx.body = 1
     }
 
     async getMatchUser () {
-        const { ctx, app } = this
-        const query = ctx.query
-        let match_id = query.id
-        let open_id = query.t
+        const { ctx, app } = this;
+        const query = ctx.query;
+        let match_id = query.id;
+        let open_id = query.t;
 
         if (!match_id || !open_id){
             ctx.body = new Error('参数错误');
@@ -150,74 +160,72 @@ class MatchController extends Controller {
         if(matchInfo.members.length > 0){
             matchInfo.members += splitWord
         }
-        matchInfo.members += open_id
-        console.log('matchInfo', matchInfo)
+        matchInfo.members += open_id;
         const updateMatchSuccess = await ctx.service.match.update(matchInfo, {
             where: {match_id}
-        })
+        });
         if (!updateMatchSuccess) {
-            ctx.body = new Error('抱歉，报名失败')
+            ctx.body = new Error('抱歉，报名失败');
             return
         }
 
         // 更新个人报名信息
         if(userInfo.join_match.length > 0){
-            userInfo.join_match += splitWord
+            userInfo.join_match += splitWord;
         }
-        userInfo.join_match += match_id
+        userInfo.join_match += match_id;
         const updateUserSuccess = await ctx.service.user.update(userInfo, {
             where: {open_id}
         })
-        console.log('userInfo', userInfo)
         if (!updateUserSuccess) {
-            ctx.body = new Error('更新个人报名信息报错')
+            ctx.body = new Error('更新个人报名信息报错');
             return
         }
         ctx.body = 1
     }
 
     async regret() {
-        const { ctx, app } = this
-        const res = await this.getMatchUser()
+        const { ctx, app } = this;
+        const res = await this.getMatchUser();
         if(!res){
             return
         }
-        const {match_id, open_id, userInfo, matchInfo} = res
+        const {match_id, open_id, userInfo, matchInfo} = res;
 
         // 查询当前用户是否队长
         if (matchInfo.leader == open_id) {
-            app.logger.error('您是队长，不能取消报名')
-            ctx.body = new Error('您是队长，不能取消报名')
+            app.logger.error('您是队长，不能取消报名');
+            ctx.body = new Error('您是队长，不能取消报名');
             return
         }
 
         // 查询当前用户是否已经报名此比赛
         if (!matchInfo.members.includes(userInfo.open_id)) {
-            app.logger.error('您还没有报名')
-            ctx.body = new Error('您还没有报名')
+            app.logger.error('您还没有报名');
+            ctx.body = new Error('您还没有报名');
             return
         }
 
         // 更新比赛成员信息
-        matchInfo.members = matchInfo.members.split(splitWord).filter(item => item != open_id).join(splitWord)
+        matchInfo.members = matchInfo.members.split(splitWord).filter(item => item != open_id).join(splitWord);
         const updateMatchSuccess = await ctx.service.match.update(matchInfo, {
             where: {match_id}
-        })
+        });
         if (!updateMatchSuccess) {
-            ctx.body = new Error('抱歉，取消报名失败')
+            ctx.body = new Error('抱歉，取消报名失败');
             return
         }
 
         // 更新个人报名信息
-        userInfo.join_match = userInfo.join_match.split(splitWord).filter(item => item != match_id).join(splitWord)
+        userInfo.join_match = userInfo.join_match.split(splitWord).filter(item => item != match_id).join(splitWord);
         const updateUserSuccess = await ctx.service.user.update(userInfo, {
             where: {open_id}
-        })
+        });
         if (!updateUserSuccess) {
             ctx.body = new Error('更新个人报名信息报错')
             return
         }
-        ctx.body = 1
+        ctx.body = 1;
     }
 
     async muster() {
@@ -251,6 +259,8 @@ class MatchController extends Controller {
             date: data.date,
             max_numbers: data.maxNumbers || 100,
             position: data.position,
+            canceled: 0,
+            canceled_reason: null,
             members: '',
         });
         if (!ret) {
