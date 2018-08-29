@@ -30,7 +30,6 @@ const user = [
         open_id: 300003
     }
 ];
-user.forEach(item => item.type = item.skey);
 
 module.exports = {
     members: user,

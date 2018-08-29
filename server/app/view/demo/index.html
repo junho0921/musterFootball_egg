@@ -6,7 +6,7 @@
 <body>
     <div>
         {% for item in members %}
-        <button class="login" data-type="{{item.type}}">{{ item.name }} 登陆</button>
+        <button class="login" data-skey="{{item.skey}}">{{ item.name }} 登陆</button>
         {% endfor %}
         <div class="name"></div>
     </div>

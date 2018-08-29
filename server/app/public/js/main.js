@@ -110,7 +110,7 @@ EVENT.popWinMask = () =>
 // 登陆
 EVENT.login = () =>
     $('.login').click((e) => {
-        app.userType = $(e.target).data('type')
+        app.userType = $(e.target).data('skey')
         app.getUserInfo().then(() => {
             if(app.matchId){
                 REQ.getUserIsJoinedMatch(app.matchId, app.user.open_id).then(result => {
