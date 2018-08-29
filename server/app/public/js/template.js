@@ -4,9 +4,10 @@ const renderMatchList = json => (
         ${json.map(item => (
         `<li class="matchItem">
             ${renderMatchInfo(item)}
-            <button class="deleteMatch" data-match="${item.match_id}">删除</button>
+            ${item.canceled == 0 && (
+            `<button class="deleteMatch" data-match="${item.match_id}">删除</button>
             <button class="shareMatch" data-match="${item.match_id}">邀请</button>
-            <button class="editMatch" data-match="${item.match_id}">编辑</button>
+            <button class="editMatch" data-match="${item.match_id}">编辑</button>`) || ''}
         </li>`
     )).join('')}
     </ul>`
@@ -17,32 +18,23 @@ const renderJoinMatchList = (json, title) => (
         ${json.map(item => (
         `<li class="matchItem">
             ${renderMatchInfo(item)}
-            ${ item.isJoined ? 
+            ${item.canceled == 0 && (item.isJoined ? 
             `<button class="cancelJoinMatch" data-match="${item.match_id}">取消报名</button>`:
-            `<button class="joinMatch" data-match="${item.match_id}">报个名</button>`}
+            `<button class="joinMatch" data-match="${item.match_id}">报个名</button>`) || ''}
         </li>`
     )).join('')}
     </ul>`
 );
 
 const renderMatchInfo = item => (`
-    <div>
-        <span>比赛类型: ${item.type}</span>
-    </div>
-    <label>
-        <span>地点: ${item.position}</span>
-    </label>
-    <label>
-        <span>时间: ${item.date}</span>
-    </label>
-    <label>
-        <span>最大人数: ${item.max_numbers}</span>
-    </label>
-    <div>
-        <span>发起人: ${item.leader && renderUserSpan(item.leader)}</span>
-    </div>
-    <div>
-        <span>报名人: ${item.members && item.members.length && item.members.map(renderUserSpan).join('')}</span>
+    <div class="${item.canceled && 'canceled' || ''}">
+        <div>比赛类型: ${item.type}</div>
+        <div>地点: ${item.position}</div>
+        <div>时间: ${item.date}</div>
+        <div>最大人数: ${item.max_numbers}</div>
+        <div>发起人: ${item.leader && renderUserSpan(item.leader)}</div>
+        <div>报名人: ${item.members && item.members.length && item.members.map(renderUserSpan).join('')}</div>
+        ${item.canceled && `<div>取消理由: ${item.canceled_reason}</div>` || ''}
     </div>
 `);
 

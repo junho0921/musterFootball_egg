@@ -69,8 +69,8 @@ REQ.getUserIsJoinedMatch = (matchId, openId) =>
         return response.json();
     });
 // 取消比赛
-REQ.cancelMatch = (matchId, openId) =>
-    fetch(`/api/match/cancel?id=${matchId}&t=${openId}`).then((response) => {
+REQ.cancelMatch = (matchId, openId, reason) =>
+    fetch(`/api/match/cancel?id=${matchId}&t=${openId}&reason=${reason}`).then((response) => {
         //返回 object 类型
         return response.json();
     });

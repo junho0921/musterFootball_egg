@@ -71,7 +71,7 @@ class MatchController extends Controller {
             return
         }
         const {match_id, open_id, userInfo, matchInfo} = res;
-        const {canceled_reason} = ctx.query;
+        const canceled_reason = ctx.query.reason;
 
         if (matchInfo.leader != open_id){
             ctx.body = new Error('您不是比赛的发起者，不能取消比赛');

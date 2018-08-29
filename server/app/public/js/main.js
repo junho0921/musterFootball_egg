@@ -204,11 +204,12 @@ EVENT.deleteMatch = () =>
         if(!app.user.open_id){
             return alert('未登陆')
         }
-        let $e = $(e.target)
-        let matchId = $e.data('match')
+        let $e = $(e.target);
+        let matchId = $e.data('match');
+        let reason = $('#reason').val();
         if(matchId){
             console.log('删除', matchId)
-            return REQ.cancelMatch(matchId, app.user.open_id).then(result => {
+            return REQ.cancelMatch(matchId, app.user.open_id, reason || '无理由取消了，唔好意思').then(result => {
                 if(failMsg(result)){
                     return alert(failMsg(result))
                 }
