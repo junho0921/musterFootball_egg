@@ -1,4 +1,4 @@
-const renderMusterMatchList = json => (
+const renderMusterMatchList = (json, open_id) => (
     `<h2>我组织的比赛</h2>
     <ul>
         ${json.map(item => (
@@ -8,24 +8,24 @@ const renderMusterMatchList = json => (
             `<button class="deleteMatch" data-match="${item.match_id}">删除</button>
             <button class="shareMatch" data-match="${item.match_id}">邀请</button>
             <button class="editMatch" data-match="${item.match_id}">编辑</button>`) || ''}
-            ${matchJoinControl(item)}
+            ${matchJoinControl(item, open_id)}
         </li>`
     )).join('')}
     </ul>`
 );
-const renderJoinMatchList = (json, title) => (
+const renderJoinMatchList = (json, title, open_id) => (
     `<h2>${title || '比赛信息'}</h2>
     <ul>
         ${json.map(item => (
         `<li class="matchItem">
             ${renderMatchInfo(item)}
-            ${matchJoinControl(item)}
+            ${matchJoinControl(item, open_id)}
         </li>`
     )).join('')}
     </ul>`
 );
 
-const matchJoinControl = item => item.canceled == 0 && (item.isJoined ?
+const matchJoinControl = (item, open_id) => item.canceled == 0 && (item.members && item.members.find(item => item.open_id == open_id) ?
     `<button class="cancelJoinMatch" data-match="${item.match_id}">取消报名</button>`:
     `<button class="joinMatch" data-match="${item.match_id}">我也参加</button>`) || '';
 

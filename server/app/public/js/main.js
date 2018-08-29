@@ -75,9 +75,8 @@ const app = {
                 }
                 if(result.data){
                     app.muster_match = result.data;
-                    app.muster_match.forEach(item => item.isJoined = app.user.join_match.includes(item.match_id));
                     $(DOM.musters).html(
-                        renderMusterMatchList(app.muster_match)
+                        renderMusterMatchList(app.muster_match, app.user.open_id)
                     ).show()
                     EVENT.editMatch()
                 }
@@ -95,9 +94,8 @@ const app = {
                 }
                 if(result.data){
                     app.join_match = result.data;
-                    app.join_match.forEach(i => i.isJoined = true);
                     $(DOM.joins).html(
-                        renderJoinMatchList(result.data, '我参加的比赛')
+                        renderJoinMatchList(result.data, '我参加的比赛', app.user.open_id)
                     ).show()
                 }
             })
@@ -121,8 +119,7 @@ EVENT.login = () =>
                     }
                     let isJoined = result && !!result.data;
                     if(isJoined){
-                        app.match.isJoined = isJoined;
-                        $('#matchDetail').html(renderJoinMatchList([app.match], '比赛信息'));
+                        $('#matchDetail').html(renderJoinMatchList([app.match], '比赛信息', app.user.open_id));
                     }
                 })
             }
