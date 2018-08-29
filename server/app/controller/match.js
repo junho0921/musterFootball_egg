@@ -170,13 +170,10 @@ class MatchController extends Controller {
         }
 
         // 更新个人报名信息
-        if(userInfo.join_match.length > 0){
-            userInfo.join_match += splitWord;
-        }
-        userInfo.join_match += match_id;
+        userInfo.join_match += (userInfo.join_match && splitWord || '') + match_id;
         const updateUserSuccess = await ctx.service.user.update(userInfo, {
             where: {open_id}
-        })
+        });
         if (!updateUserSuccess) {
             ctx.body = new Error('更新个人报名信息报错');
             return
@@ -218,6 +215,7 @@ class MatchController extends Controller {
 
         // 更新个人报名信息
         userInfo.join_match = userInfo.join_match.split(splitWord).filter(item => item != match_id).join(splitWord);
+        userInfo.regret_join_match += (userInfo.regret_join_match && splitWord || '') + match_id;
         const updateUserSuccess = await ctx.service.user.update(userInfo, {
             where: {open_id}
         });
