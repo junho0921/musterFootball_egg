@@ -19,7 +19,6 @@ module.exports = app => {
     router.get('/api/match/join', wrap, validationMiddleware, controller.match.join);
     router.get('/api/match/regret', wrap, validationMiddleware, controller.match.regret);
     router.get('/api/match/get', wrap, controller.match.get);
-    router.get('/api/match/isJoined', wrap, controller.match.isJoined);
 };
 
 /*

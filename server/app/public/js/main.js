@@ -25,11 +25,14 @@ const app = {
             let matchInfo = result.data && result.data[0];
             if(matchInfo){
                 app.match = matchInfo;
-                $('#matchDetail').html(
-                    renderJoinMatchList([matchInfo], '比赛信息')
-                );
+                app.renderPageMatch();
             }
         })
+    },
+    renderPageMatch: function(){
+        $('#matchDetail').html(
+            renderJoinMatchList([app.match], '比赛信息', app.user.open_id)
+        );
     },
     bindEvent: () => {
         Object.keys(EVENT).forEach(key => EVENT[key]())
@@ -119,18 +122,11 @@ EVENT.login = () =>
         app.userType = $(e.target).data('skey')
         app.getUserInfo().then(() => {
             if(app.matchId){
-                REQ.getUserIsJoinedMatch(app.matchId, app.user.open_id).then(result => {
-                    if(failMsg(result)){
-                        return alert(failMsg(result));
-                    }
-                    let isJoined = result && !!result.data;
-                    if(isJoined){
-                        $('#matchDetail').html(renderJoinMatchList([app.match], '比赛信息', app.user.open_id));
-                    }
-                })
+                // 重新渲染页面比赛信息，报名状态
+                app.renderPageMatch();
             }
-        })
-    })
+        });
+    });
 // 更新用户信息
 EVENT.editUserInfo = () =>
     $('#editUserInfo').click(app.popUserFormWin)

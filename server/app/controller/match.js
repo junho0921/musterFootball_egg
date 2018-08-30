@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const Controller = require('egg').Controller;
 
@@ -33,7 +33,6 @@ class MatchController extends Controller {
             }
             return sum;
         }, []);
-        console.log('match--------', matchs)
         let membersInfo = await ctx.service.user.find({
             columns: ['name', 'wx_img', 'real_name', 'open_id'],
             where: {
@@ -42,26 +41,14 @@ class MatchController extends Controller {
         });
         matchs.forEach(item => {
             item.leader = Object.assign({}, membersInfo.find(i => i.open_id == item.leader));
-            // delete item.leader.open_id;
             if(item.members){
                 item.members = item.members.map(id => {
                     let info = Object.assign({}, membersInfo.find(i => i.open_id == id));
-                    // delete info.open_id;
                     return info;
                 })
             }
         });
         ctx.body = matchs;
-    }
-
-    async isJoined() {
-        const { ctx } = this;
-        const res = await this.getMatchUser();
-        if(!res){
-            return;
-        }
-        const {match_id, open_id, userInfo, matchInfo} = res;
-        ctx.body = matchInfo.members.includes(open_id) ? 1 : 0;
     }
 
     async cancel(){
@@ -93,15 +80,6 @@ class MatchController extends Controller {
             ctx.body = new Error('取消失败');
             return
         }
-        // let newList = userInfo.muster_match.split(splitWord).filter(item => item != match_id)
-        // userInfo.muster_match = newList.join(splitWord)
-        // let updateSuccess = await ctx.service.user.update(userInfo, {
-        //     where: {open_id}
-        // })
-        // if (!updateSuccess){
-        //     ctx.body = new Error('更新用户信息失败');
-        //     return
-        // }
         ctx.body = 1
     }
 
@@ -151,7 +129,6 @@ class MatchController extends Controller {
 
         // 查询当前用户是否已经报名此比赛
         if (matchInfo.members.includes(userInfo.open_id)) {
-            console.log('matchInfo===========', matchInfo)
             app.logger.error('已经报名', matchInfo)
             ctx.body = new Error('已经报名')
             return

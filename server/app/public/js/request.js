@@ -70,12 +70,6 @@ REQ.getMatchInfo = (idList) =>
         //返回 object 类型
         return response.json();
     });
-// 获取是否已经参与比赛
-REQ.getUserIsJoinedMatch = (matchId) =>
-    fetch(`/api/match/isJoined?id=${matchId}`).then((response) => {
-        //返回 object 类型
-        return response.json();
-    });
 // 取消比赛
 REQ.cancelMatch = (matchId, reason) =>
     fetchByLogin(`/api/match/cancel?id=${matchId}&reason=${reason}`).then((response) => {
