@@ -18,12 +18,14 @@
 === 安装
 
 . 安装mySql
-. 手动建立数据库schema: musterFootball, 子table: user_info, matchs
+. 按照 `server/app/tools/cAuth.sql` 来配置数据库
 . 手动配置 `server/config/config.default.js` 里的数据库密码
 . `cd server/`
 . `npm install`
 . `npm run dev`
 . 访问 `http://127.0.0.1:3089/` 就可以看见效果
+
+== 探讨
 
 === 对egg的感受
 
@@ -39,7 +41,7 @@ post跨域安全
 
 报错记录日志
 
-=== 其他：产品设计
+== 其他：产品设计
 
 产品理念：足球约队
 
