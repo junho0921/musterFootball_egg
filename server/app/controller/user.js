@@ -1,5 +1,5 @@
 'use strict';
-
+const moment = require('moment');
 const Controller = require('egg').Controller;
 
 class UserController extends Controller {
@@ -13,15 +13,17 @@ class UserController extends Controller {
         const open_id = data.open_id;
         // 维护一套用户信息数据库，区别与微信cSessionInfo数据库
         let userInfo = await ctx.service.user.get({open_id});
+        const last_login_time = moment().format('YYYY-MM-DD HH:mm:ss');
         if (!userInfo) {
             userInfo = {
                 open_id,
-                name: data.name || '默认姓名',
-                phone: data.phone,
-                last_login_time: Date.now(),
-                wx_img: data.wx_img,
+                phone: '',
+                wx_img: data.user_info.wx_img || '',
+                name: data.user_info.name || '未知用户',
+                last_login_time,
                 real_name: '',
                 join_match: '',
+                match_tips: '',
                 regret_join_match: '',
                 cancel_muster_match: '',
                 muster_match: ''
@@ -32,8 +34,10 @@ class UserController extends Controller {
                 return;
             }
         } else {
-            userInfo.last_login_time = Date.now();
-            ctx.service.user.update(userInfo, {
+            // 更新用户的登陆时间
+            ctx.service.user.update({
+                last_login_time
+            }, {
                 where: {open_id}
             });
         }

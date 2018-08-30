@@ -69,7 +69,7 @@ const app = {
             return alert(failMsg(result))
         }
         app.user = result.data.p_user_info;
-        $('.name').text(app.user.name + '，欢迎你')
+        $('.name').text(app.user.name + '，欢迎你');
         return result
     }).then(() => {
         app.renderMusterMatchList();

@@ -6,29 +6,34 @@ const imgURL = [
 
 const user = [
     {
-        name: 'leader',
-        skey: '10',
-        wx_img: imgURL[0],
-        open_id: 10000
-    },
-    {
-        name: 'member_1',
+        skey: '11',
+        open_id: 100000,
+        user_info: {
+            name: 'leader',
+            wx_img: imgURL[0]
+        }
+    },{
         skey: '12',
-        wx_img: imgURL[1],
-        open_id: 300001
-    },
-    {
-        name: 'member_2',
+        open_id: 300001,
+        user_info: {
+            name: 'member_1',
+            wx_img: imgURL[1]
+        }
+    },{
         skey: '13',
-        wx_img: imgURL[1],
-        open_id: 300002
-    },
-    {
-        name: 'member_3',
+        open_id: 300002,
+        user_info: {
+            name: 'member_2',
+            wx_img: imgURL[1]
+        }
+    },{
         skey: '14',
-        wx_img: imgURL[1],
-        open_id: 300003
-    }
+        open_id: 3000023,
+        user_info: {
+            name: 'member_3',
+            wx_img: imgURL[1]
+        }
+    },
 ];
 
 module.exports = {

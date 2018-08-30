@@ -39,7 +39,7 @@ module.exports = appInfo => {
                 port: '3306',
                 user: 'root',
                 password: '', // todo 请输入您的数据库密码
-                database: 'musterFootball'
+                database: 'cAuth'
             },
             // 挂载到 app
             app: true,

@@ -1,5 +1,5 @@
 'use strict';
-
+const moment = require('moment');
 const Service  = require('egg').Service;
 
 // 数据库表名
@@ -33,7 +33,7 @@ class RemarkService extends Service {
      */
     async add(item) {
         const { app } = this;
-        item.created_by = parseInt(new Date().getTime() / 1000);
+        item.created_by = moment().format('YYYY-MM-DD HH:mm:ss');
         const result = await app.mysql.insert(TABLE_NAME, item);
         return result && result.affectedRows === 1;
     }
@@ -45,7 +45,7 @@ class RemarkService extends Service {
      */
     async update(item, options) {
         const { app } = this;
-        item.updated_by = parseInt(new Date().getTime() / 1000);
+        item.updated_by = moment().format('YYYY-MM-DD HH:mm:ss');
         const result = await app.mysql.update(TABLE_NAME, item, options);
         return result && result.affectedRows === 1;
     }
