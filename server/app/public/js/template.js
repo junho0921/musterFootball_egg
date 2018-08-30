@@ -5,9 +5,9 @@ const renderMusterMatchList = (json, open_id) => (
         `<li class="matchItem">
             ${renderMatchInfo(item)}
             ${item.canceled == 0 && (
-            `<button class="deleteMatch" data-match="${item.match_id}">删除</button>
-            <button class="shareMatch" data-match="${item.match_id}">邀请</button>
-            <button class="editMatch" data-match="${item.match_id}">编辑</button>`) || ''}
+            `<button class="deleteMatch" data-match="${item.match_id}">取消比赛</button>
+            <button class="shareMatch" data-match="${item.match_id}">邀请同伴</button>
+            <button class="editMatch" data-match="${item.match_id}">编辑比赛</button>`) || ''}
             ${matchJoinControl(item, open_id)}
         </li>`
     )).join('')}
@@ -88,5 +88,14 @@ const renderUserSpan = info => (
     `<div class="userSpan">
         <img src="${info.wx_img}" alt="">
         <p>${info.name}</p>
+    </div>`
+);
+
+const renderCancelInput = (match_id) => (
+    `<div class="renderCancelInput">
+        <h3>请输入取消理由</h3>
+        <h5>让您的队员知道为什么</h5>
+        <input type="text" placeholder="" id="cancelInput"/>
+        <button class="cancelMatch" data-match="${match_id}">删除</button>
     </div>`
 );

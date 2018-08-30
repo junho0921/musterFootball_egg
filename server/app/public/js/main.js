@@ -55,6 +55,12 @@ const app = {
         $('#popWin').css('display', 'flex')
         EVENT.updateInfo()
     },
+    popCancelMatchWin: match_id => {
+        $('#popWin .content')
+            .html(renderCancelInput(match_id))
+            .css('display', 'flex')
+        $('#popWin').css('display', 'flex')
+    },
     getUserInfo: () => REQ.getInfo().then((result) => {
         if(failMsg(result)){
             return alert(failMsg(result))
@@ -198,7 +204,30 @@ EVENT.submitMatch = (onSubmit, matchInfo) =>
         console.log('data', data)
         onSubmit(data)
     })
-// 提交比赛表格
+// 取消比赛
+EVENT.cancelMatch = () =>
+    $('body').on('click', '.cancelMatch', function (e) {
+        if(!app.user.open_id){
+            return alert('未登陆')
+        }
+        let $e = $(e.target);
+        let matchId = $e.data('match');
+        let reason = $('#cancelInput').val().trim();
+        if(!reason){
+            return alert('请输入取消理由');
+        }
+        if(matchId){
+            console.log('删除', matchId)
+            return REQ.cancelMatch(matchId, reason).then(result => {
+                if(failMsg(result)){
+                    return alert(failMsg(result))
+                }
+                app.hidePopWin();
+                app.getUserInfo();
+            });
+        }
+    });
+// 取消比赛
 EVENT.deleteMatch = () =>
     $(DOM.musters).on('click', '.deleteMatch', function (e) {
         if(!app.user.open_id){
@@ -206,18 +235,10 @@ EVENT.deleteMatch = () =>
         }
         let $e = $(e.target);
         let matchId = $e.data('match');
-        let reason = $('#reason').val();
-        if(matchId){
-            console.log('删除', matchId)
-            return REQ.cancelMatch(matchId, reason || '无理由取消了，唔好意思').then(result => {
-                if(failMsg(result)){
-                    return alert(failMsg(result))
-                }
-                if(result.data === 1){
-                    $e.parents('.matchItem').remove()
-                }
-            });
+        if(!matchId){
+            return alert('获取信息失败');
         }
+        app.popCancelMatchWin(matchId);
     });
 // 分享比赛
 EVENT.shareMatch = () =>
